@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>非遗文旅项目智能测算系统</title>
+<style>
+:root{--primary:#1a4a6a;--primary-light:#2e7daa;--primary-dark:#0f2d40;--gold:#c8a855;--bg:#f5f2eb;--surface:#ffffff;--surface2:#f0ece3;--border:#d6cfc0;--text:#1e1e1e;--text2:#5a5a4a;--text3:#8a8070;--success:#2d7a4a;--warn:#c77800;--danger:#b03a2e;--info:#1a6b8a;--radius:8px;--shadow:0 1px 8px rgba(0,0,0,.06);--shadow-md:0 3px 16px rgba(0,0,0,.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* NAV */
+nav{background:var(--primary-dark);color:#fff;padding:0 24px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.nav-brand{font-size:17px;font-weight:700;padding:16px 20px 16px 0;border-right:1px solid rgba(255,255,255,.2);margin-right:8px;white-space:nowrap;letter-spacing:.5px}
+.nav-brand span{color:var(--gold)}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto}
+.nav-tab{padding:16px 18px;cursor:pointer;font-size:14px;opacity:.7;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;user-select:none}
+.nav-tab:hover{opacity:1;background:rgba(255,255,255,.08)}
+.nav-tab.active{opacity:1;border-bottom-color:var(--gold);font-weight:600}
+.nav-actions{margin-left:auto;display:flex;gap:8px;padding-left:16px}
+/* LAYOUT */
+.page{display:none;padding:24px;max-width:1300px;margin:0 auto}
+.page.active{display:block}
+/* CARDS */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--surface2);padding-bottom:10px}
+.card-title::before{content:'';width:4px;height:18px;background:var(--primary);border-radius:2px;display:inline-block}
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+/* FORM */
+.form-group{margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;font-weight:500}
+input[type=number],input[type=text],select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;color:var(--text);background:#fff;transition:border-color .2s}
+input[type=number]:focus,input[type=text]:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(200,98,42,.12)}
+input[readonly]{background:var(--surface2);color:var(--text2)}
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--primary-dark);color:#fff;padding:9px 10px;text-align:center;white-space:nowrap;font-weight:600}
+td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
+tr:nth-child(even) td{background:var(--surface2)}
+tr:last-child td{background:var(--surface);font-weight:700;border-bottom:none}
+td input[type=number]{border:none;background:transparent;text-align:center;padding:4px 6px;width:100%;min-width:80px}
+td input[type=number]:focus{background:#fff8f0;border-radius:4px}
+td input[type=text]{border:none;background:transparent;padding:4px 6px;width:100%;min-width:80px}
+td input[type=text]:focus{background:#fff8f0;border-radius:4px}
+td select{border:none;background:transparent;padding:4px;font-size:13px}
+/* BTNS */
+.btn{padding:9px 20px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-success{background:var(--success);color:#fff}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-outline{background:transparent;color:var(--primary);border:1px solid var(--primary)}
+.btn-outline:hover{background:var(--primary);color:#fff}
+/* TABLE FOR KPI / RESULT DISPLAY */
+.kpi-table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px}
+.kpi-table th{background:var(--primary-dark);color:#fff;padding:8px 10px;text-align:center;font-weight:600}
+.kpi-table td{padding:8px 10px;text-align:center;border:1px solid var(--border);vertical-align:middle}
+.kpi-table td.kpi-num{font-size:18px;font-weight:700;color:var(--primary-dark)}
+.kpi-table td.kpi-label{font-size:12px;color:var(--text2)}
+.kpi-table tr:last-child td{background:var(--surface2);font-weight:600}
+.result-tbl{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.result-tbl th{background:var(--primary-dark);color:#fff;padding:8px 10px;text-align:center}
+.result-tbl td{padding:7px 10px;border:1px solid rgba(255,255,255,.2);color:#fff}
+.result-tbl td:first-child{color:rgba(255,255,255,.8)}
+.result-tbl td:last-child{font-weight:700;color:var(--gold)}
+/* STATUS BADGES */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-success{background:#e8f5ee;color:var(--success)}
+.badge-warn{background:#fff4e0;color:var(--warn)}
+.badge-danger{background:#fde8e8;color:var(--danger)}
+.badge-info{background:#e0f0f8;color:var(--info)}
+/* TABS */
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border)}
+.tab-btn{padding:9px 18px;cursor:pointer;font-size:14px;border-radius:6px 6px 0 0;background:transparent;border:none;color:var(--text2);font-weight:500;transition:all .2s;margin-bottom:-2px;border-bottom:2px solid transparent}
+.tab-btn.active{background:var(--surface);color:var(--primary-dark);border-color:var(--primary);font-weight:700}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.alert-success{background:#e8f5ee;border-left:4px solid var(--success);color:#1a5c35}
+.alert-warn{background:#fff4e0;border-left:4px solid var(--warn);color:#7a4800}
+.alert-danger{background:#fde8e8;border-left:4px solid var(--danger);color:#8b1a1a}
+/* SCORE TABLE (传承人得分) */
+.score-tbl{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.score-tbl th{background:var(--primary-dark);color:#fff;padding:8px;text-align:center}
+.score-tbl td{padding:8px 10px;border:1px solid var(--border);text-align:center}
+.score-tbl td.score-val{font-size:20px;font-weight:700;color:var(--primary-dark)}
+.score-tbl td.score-grade{font-size:16px;font-weight:700}
+/* SECTION HEADER */
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+/* TOOLTIP */
+.tip{font-size:11px;color:var(--text3);margin-top:3px}
+/* RADAR */
+canvas{max-width:100%}
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--primary-dark) 0%,#7a3a18 50%,#3a1a08 100%);color:#fff;border-radius:var(--radius);padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden}
+.hero::after{content:'非遗';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:100px;opacity:.06;font-weight:900;pointer-events:none}
+.hero h1{font-size:22px;margin-bottom:8px;color:#fff}
+.hero p{font-size:14px;opacity:.8;line-height:1.6}
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hero-tag{background:rgba(255,255,255,.15);padding:4px 12px;border-radius:20px;font-size:12px}
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{flex-wrap:nowrap;padding:0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .nav-brand{font-size:14px;padding:12px 10px 12px 0;border-right:1px solid rgba(255,255,255,.15);flex-shrink:0}
+  .nav-tabs{flex-nowrap:nowrap;min-width:max-content;flex-shrink:0}
+  .nav-tab{font-size:13px;padding:12px 10px;flex-shrink:0}
+  .nav-actions{flex-shrink:0;padding-left:8px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .page{padding:12px}
+  .tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
+  .tab-btn{font-size:13px;padding:8px 10px;white-space:nowrap;flex-shrink:0}
+  .tbl-wrap{font-size:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;overflow-scrolling:touch}
+  .tbl-wrap table{min-width:900px}
+  .tbl-wrap tfoot td{background:var(--surface2)!important;font-weight:700}
+  th,td{padding:5px 4px}
+}
+/* ADD ROW BTN */
+.add-row-btn{background:var(--surface2);border:1px dashed var(--border);color:var(--text2);width:100%;padding:8px;border-radius:6px;cursor:pointer;font-size:13px;margin-top:8px;transition:all .2s}
+.add-row-btn:hover{border-color:var(--primary);color:var(--primary);background:#fff}
+.del-btn{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;border-radius:4px}
+.del-btn:hover{color:var(--danger);background:#fde8e8}
+/* CHART WRAPPER */
+.chart-wrap{position:relative;height:280px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">🏮 <span>非遗文旅</span>智能测算</div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchPage('cost')">成本核算</div>
+    <div class="nav-tab" onclick="switchPage('roi')">ROI测算</div>
+    <div class="nav-tab" onclick="switchPage('perf')">绩效评价</div>
+    <div class="nav-tab" onclick="switchPage('dashboard')">综合看板</div>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-gold btn-sm" onclick="loadDemoData()" style="background:#fff;color:var(--primary-dark)">📥 加载案例</button>
+    <button class="btn btn-gold btn-sm" onclick="exportData()">⬇ 导出</button>
+    <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="resetAll()">↺ 重置</button>
+  </div>
+</nav>
+
+<!-- ===================== PAGE 1: 成本核算 ===================== -->
+<div class="page active" id="page-cost">
+  <div class="hero">
+    <h1>全链路成本分类与核算系统</h1>
+    <p>8大模块 · 文化成本独立核算 · 传承人三级计价 · 核心仪式合规预警</p>
+    <div class="hero-tags">
+      <span class="hero-tag">文化传承成本独立</span>
+      <span class="hero-tag">三级计价模型</span>
+      <span class="hero-tag">合规性自动校验</span>
+    </div>
+  </div>
+
+  <!-- KPIs：改成表格，包在tbl-wrap里支持手机端横向滚动 -->
+  <div class="tbl-wrap">
+  <table class="kpi-table" id="cost-kpis">
+    <thead><tr>
+      <th>年度总成本(元)</th><th>文化传承成本(元)</th><th>文化成本占比</th>
+      <th>核心仪式成本(元)</th><th>仪式占文化成本</th><th>传承人劳务总计(元)</th>
+    </tr></thead>
+    <tbody><tr>
+      <td class="kpi-num" id="k-total-cost">0</td>
+      <td class="kpi-num" id="k-culture-cost">0</td>
+      <td class="kpi-num" id="k-culture-ratio">0%</td>
+      <td class="kpi-num" id="k-ceremony-cost">0</td>
+      <td class="kpi-num" id="k-ceremony-ratio">0%</td>
+      <td class="kpi-num" id="k-labor-total">0</td>
+    </tr></tbody>
+  </table>
+  </div>
+
+  <div id="cost-compliance-alerts"></div>
+
+  <!-- SUB TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('cost','monthly',this)">月度成本明细</button>
+    <button class="tab-btn" onclick="switchTab('cost','labor',this)">传承人劳务计算</button>
+    <button class="tab-btn" onclick="switchTab('cost','ceremony',this)">核心仪式台账</button>
+    <button class="tab-btn" onclick="switchTab('cost','params',this)">系统参数</button>
+  </div>
+
+  <!-- 月度成本 -->
+  <div class="tab-pane active" id="cost-monthly">
+    <div class="card">
+      <div class="card-title">全链路成本月度明细（元）</div>
+      <div class="tbl-wrap">
+        <table id="tbl-monthly-cost">
+          <thead>
+            <tr>
+              <th>月份</th>
+              <th>文化传承成本</th>
+              <th>运营服务成本</th>
+              <th>场地设施成本</th>
+              <th>营销推广成本</th>
+              <th>行政管理成本</th>
+              <th>设备耗材成本</th>
+              <th>税费规费</th>
+              <th>其他专项成本</th>
+              <th>月度总成本</th>
+            </tr>
+          </thead>
+          <tbody id="monthly-cost-body"></tbody>
+          <tfoot>
+            <tr id="cost-annual-row">
+              <td>年度合计</td>
+              <td id="at-c1">0</td><td id="at-c2">0</td><td id="at-c3">0</td>
+              <td id="at-c4">0</td><td id="at-c5">0</td><td id="at-c6">0</td>
+              <td id="at-c7">0</td><td id="at-c8">0</td><td id="at-total">0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="tip" style="margin-top:8px">💡 填写各月各类成本后，月度总成本自动汇总，年度合计自动计算</div>
+    </div>
+  </div>
+
+  <!-- 传承人劳务 -->
+  <div class="tab-pane" id="cost-labor">
+    <div class="card">
+      <div class="section-header">
+        <div class="card-title" style="margin:0">传承人劳务三级计价计算</div>
+        <button class="btn btn-primary btn-sm" onclick="addLaborRow()">+ 新增记录</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>月份</th><th>姓名</th><th>级别</th><th>工时(h)</th>
+              <th>项目营收(元)</th><th>基础劳务</th><th>技艺溢价</th>
+              <th>项目分红</th><th>总报酬</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="labor-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addLaborRow()">＋ 添加传承人记录</button>
+    </div>
+    <!-- 级别说明 -->
+    <div class="card">
+      <div class="card-title">传承人计价参数（可在"系统参数"页修改）</div>
+      <div class="tbl-wrap">
+        <table id="tbl-price-ref">
+          <thead><tr><th>级别</th><th>基础单价(元/h)</th><th>技艺溢价</th><th>项目分红</th></tr></thead>
+          <tbody id="price-ref-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核心仪式 -->
+  <div class="tab-pane" id="cost-ceremony">
+    <div class="card">
+      <div class="section-header">
+        <div class="card-title" style="margin:0">核心仪式成本台账（文化专项独立核算）</div>
+        <button class="btn btn-primary btn-sm" onclick="addCeremonyRow()">+ 新增记录</button>
+      </div>
+      <div class="alert alert-warn"><span class="alert-icon">⚠️</span><span>核心仪式成本不得计入商业成本，不得参与商业分摊，每笔支出需留存完整凭证</span></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>仪式名称</th><th>举办日期</th><th>支出项目</th><th>金额(元)</th><th>凭证编号</th><th>参与传承人</th><th>操作</th></tr>
+          </thead>
+          <tbody id="ceremony-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addCeremonyRow()">＋ 添加仪式记录</button>
+    </div>
+  </div>
+
+  <!-- 参数配置 -->
+  <div class="tab-pane" id="cost-params">
+    <div class="card">
+      <div class="card-title">传承人计价参数配置</div>
+      <div class="grid-3" id="param-grid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">成本合规性参数</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>文化传承成本基准占比</label>
+          <input type="number" id="param-culture-ratio" value="32" min="0" max="100" onchange="debouncedCalcCost()">
+          <div class="tip">文化传承成本需占年度总成本的最低比例（%）</div>
+        </div>
+        <div class="form-group">
+          <label>核心仪式最低占比（占文化传承成本）</label>
+          <input type="number" id="param-ceremony-ratio" value="20" min="0" max="100" onchange="debouncedCalcCost()">
+          <div class="tip">核心仪式费用需占文化传承成本的最低比例（%）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 2: ROI测算 ===================== -->
+<div class="page" id="page-roi">
+  <div class="hero">
+    <h1>全链路ROI智能测算与预警系统</h1>
+    <p>基础财务ROI + 文化价值修正ROI · 三阶段分环节测算 · 智能预警决策建议</p>
+    <div class="hero-tags">
+      <span class="hero-tag">双维度ROI</span>
+      <span class="hero-tag">三阶段测算</span>
+      <span class="hero-tag">智能预警</span>
+    </div>
+  </div>
+
+  <!-- 基础参数 -->
+  <div class="card">
+    <div class="card-title">基础项目参数与文化修正参数</div>
+    <div class="grid-3">
+      <div class="form-group">
+        <label>项目总营收（万元）</label>
+        <input type="number" id="roi-revenue" value="" placeholder="请输入" onblur="debouncedCalcROI()">
+      </div>
+      <div class="form-group">
+        <label>项目总成本（万元）</label>
+        <input type="number" id="roi-cost" value="" placeholder="请输入" onblur="debouncedCalcROI()">
+      </div>
+      <div class="form-group">
+        <label>主要渠道类型</label>
+        <select id="roi-channel-type" onchange="calcROI()">
+          <option value="新媒体">新媒体</option>
+          <option value="传统媒体">传统媒体</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>α：品牌溢价系数（0.1~0.3）</label>
+        <input type="number" id="roi-alpha" value="0.22" step="0.01" min="0.1" max="0.3" onblur="debouncedCalcROI()">
+        <div class="tip">非遗IP带来的客单价提升比例</div>
+      </div>
+      <div class="form-group">
+        <label>β：文化传承指数（0~1）</label>
+        <input type="number" id="roi-beta" value="0.85" step="0.01" min="0" max="1" onblur="debouncedCalcROI()">
+        <div class="tip">传承人满意度+技艺传播度综合评分</div>
+      </div>
+      <div class="form-group">
+        <label>γ：社会影响力权重（0.05~0.15）</label>
+        <input type="number" id="roi-gamma" value="0.12" step="0.01" min="0.05" max="0.15" onblur="debouncedCalcROI()">
+        <div class="tip">媒体曝光+政策支持力度</div>
+      </div>
+    </div>
+    <!-- 核心ROI结果：改成表格 -->
+    <table class="result-tbl">
+      <thead><tr><th colspan="4">项目核心ROI计算结果</th></tr></thead>
+      <tbody>
+        <tr><td>基础财务ROI</td><td id="r-base-roi">—</td><td>基础ROI 行业基准</td><td>1.20</td></tr>
+        <tr><td>文化价值修正ROI</td><td id="r-corrected-roi">—</td><td>修正ROI 行业基准</td><td>1.50</td></tr>
+        <tr><td>项目利润（万元）</td><td id="r-profit">—</td><td>项目状态</td><td id="r-project-status">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('roi','stage1',this)">阶段一：触达引流期</button>
+    <button class="tab-btn" onclick="switchTab('roi','stage2',this)">阶段二：转化体验期</button>
+    <button class="tab-btn" onclick="switchTab('roi','stage3',this)">阶段三：后期转化期</button>
+    <button class="tab-btn" onclick="switchTab('roi','warn',this)">智能预警看板</button>
+  </div>
+
+  <!-- 阶段一 -->
+  <div class="tab-pane active" id="roi-stage1">
+    <div class="card">
+      <div class="card-title">触达引流期 — 渠道ROI明细</div>
+      <div class="tbl-wrap">
+        <table id="tbl-channel">
+          <thead><tr><th>渠道名称</th><th>投放成本(万元)</th><th>带来营收(万元)</th><th>渠道ROI</th><th>行业基准</th><th>预警状态</th></tr></thead>
+          <tbody id="channel-body"></tbody>
+          <tfoot><tr><td>综合</td><td id="ch-cost-sum">0</td><td id="ch-rev-sum">0</td><td id="ch-roi-sum">—</td><td>1.20</td><td id="ch-status-sum">—</td></tr></tfoot>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addChannelRow()">＋ 添加渠道</button>
+    </div>
+  </div>
+
+  <!-- 阶段二 -->
+  <div class="tab-pane" id="roi-stage2">
+    <div class="card">
+      <div class="card-title">转化体验期 — 非遗体验环节ROI</div>
+      <div class="tbl-wrap">
+        <table id="tbl-experience">
+          <thead><tr><th>环节名称</th><th>直接成本(万元)</th><th>间接成本(万元)</th><th>环节营收(万元)</th><th>环节ROI</th><th>预警状态</th></tr></thead>
+          <tbody id="experience-body"></tbody>
+          <tfoot><tr><td>综合</td><td id="ex-dc-sum">0</td><td id="ex-ic-sum">0</td><td id="ex-rev-sum">0</td><td id="ex-roi-sum">—</td><td id="ex-status-sum">—</td></tr></tfoot>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addExperienceRow()">＋ 添加体验环节</button>
+    </div>
+  </div>
+
+  <!-- 阶段三 -->
+  <div class="tab-pane" id="roi-stage3">
+    <div class="card">
+      <div class="card-title">后期转化期 — 复购与口碑转化</div>
+      <div class="tbl-wrap">
+        <table id="tbl-retention">
+          <thead><tr><th>转化类型</th><th>转化营收(万元)</th><th>对应前期成本(万元)</th><th>转化ROI</th><th>行业基准</th><th>状态</th></tr></thead>
+          <tbody id="retention-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 预警看板 -->
+  <div class="tab-pane" id="roi-warn">
+    <div class="card">
+      <div class="card-title">智能预警看板 & 决策建议</div>
+      <div id="warn-alerts"></div>
+      <div id="warn-decisions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 3: 绩效评价 ===================== -->
+<div class="page" id="page-perf">
+  <div class="hero">
+    <h1>财务+非遗双维度绩效评价体系</h1>
+    <p>4维度12指标 · 传承人专项评估 · 旺季自动调整 · 改进矩阵输出</p>
+    <div class="hero-tags">
+      <span class="hero-tag">财务维度35%</span>
+      <span class="hero-tag">文化传承35%</span>
+      <span class="hero-tag">运营效率15%</span>
+      <span class="hero-tag">社会影响15%</span>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('perf','monthly',this)">月度数据录入</button>
+    <button class="tab-btn" onclick="switchTab('perf','inheritor',this)">传承人专项评估</button>
+    <button class="tab-btn" onclick="switchTab('perf','config',this)">指标配置</button>
+    <button class="tab-btn" onclick="switchTab('perf','result',this)">评价结果</button>
+  </div>
+
+  <!-- 月度数据 -->
+  <div class="tab-pane active" id="perf-monthly">
+    <div class="card">
+      <div class="card-title">月度指标数据录入</div>
+      <div class="tbl-wrap">
+        <table id="tbl-perf-monthly">
+          <thead>
+            <tr>
+              <th>月份</th>
+              <th>月度营收(元)</th>
+              <th>ROI</th>
+              <th>毛利率(%)</th>
+              <th>现金流健康度</th>
+              <th>授徒时长(h)</th>
+              <th>展示次数(次)</th>
+              <th>衍生品原创率(%)</th>
+              <th>数字化率(%)</th>
+              <th>游客转化率(%)</th>
+              <th>客单价(元)</th>
+              <th>媒体曝光(次)</th>
+              <th>满意度(1-5)</th>
+            </tr>
+          </thead>
+          <tbody id="perf-monthly-body"></tbody>
+        </table>
+      </div>
+      <div class="tip" style="margin-top:8px">💡 填写完成后点击"评价结果"页查看自动计算的得分与评级</div>
+    </div>
+  </div>
+
+  <!-- 传承人评估 -->
+  <div class="tab-pane" id="perf-inheritor">
+    <div class="card">
+      <div class="card-title">传承人专项评估（文化维度核心，权重60%）</div>
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label>技艺掌握度（1-10分，权重30%）</label>
+            <input type="number" id="inh-mastery" value="" min="1" max="10" step="0.1" placeholder="1-10分" onblur="calcInheritorScore()">
+            <div class="tip">10分=完整掌握核心技艺，能独立完成高难度作品</div>
+          </div>
+          <div class="form-group">
+            <label>传承积极性（1-10分，权重25%）</label>
+            <input type="number" id="inh-active" value="" min="1" max="10" step="0.1" placeholder="1-10分" onblur="calcInheritorScore()">
+            <div class="tip">10分=主动开展授徒、公益展示</div>
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label>技艺创新能力（1-10分，权重25%）</label>
+            <input type="number" id="inh-innovation" value="" min="1" max="10" step="0.1" placeholder="1-10分" onblur="calcInheritorScore()">
+            <div class="tip">10分=结合现代需求开发3款以上创新产品</div>
+          </div>
+          <div class="form-group">
+            <label>行业影响力（1-10分，权重20%）</label>
+            <input type="number" id="inh-influence" value="" min="1" max="10" step="0.1" placeholder="1-10分" onblur="calcInheritorScore()">
+            <div class="tip">10分=省级以上传承人，行业内有较高知名度</div>
+          </div>
+        </div>
+      </div>
+      <!-- 传承人专项评估得分：改成表格 -->
+      <table class="score-tbl" id="inheritor-result">
+        <thead><tr><th colspan="5">传承人专项评估得分</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>技艺掌握度得分</td><td id="ir-mastery">—</td>
+            <td>传承积极性得分</td><td id="ir-active">—</td>
+          </tr>
+          <tr>
+            <td>创新能力得分</td><td id="ir-innovation">—</td>
+            <td>行业影响力得分</td><td id="ir-influence">—</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td><b>综合得分</b></td>
+            <td class="score-val" id="inh-score-num">—</td>
+            <td><b>评级</b></td>
+            <td class="score-grade" id="inh-score-grade">请填写各项评分</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 配置 -->
+  <div class="tab-pane" id="perf-config">
+    <div class="card">
+      <div class="card-title">四维度权重配置</div>
+      <div class="grid-4" id="perf-weight-grid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">指标基准值配置（满分100分对应标准值）</div>
+      <div class="grid-3" id="perf-baseline-grid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">旺季调整配置</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>旺季月份（逗号分隔，如 12,1,2）</label>
+          <input type="text" id="peak-months" value="12,1,2" onchange="calcPerfAll()">
+        </div>
+        <div></div>
+        <div class="form-group">
+          <label>旺季营收基准上浮比例（%）</label>
+          <input type="number" id="peak-rev" value="80" onblur="calcPerfAll()">
+        </div>
+        <div class="form-group">
+          <label>旺季ROI基准上浮比例（%）</label>
+          <input type="number" id="peak-roi" value="50" onblur="calcPerfAll()">
+        </div>
+        <div class="form-group">
+          <label>旺季毛利率基准上浮比例（%）</label>
+          <input type="number" id="peak-margin" value="20" onblur="calcPerfAll()">
+        </div>
+        <div class="form-group">
+          <label>旺季客单价基准上浮比例（%）</label>
+          <input type="number" id="peak-price" value="30" onblur="calcPerfAll()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结果 -->
+  <div class="tab-pane" id="perf-result">
+  <div class="tbl-wrap">
+    <table class="kpi-table" id="perf-result-kpis">
+      <thead><tr><th>年度平均综合得分</th><th>评级</th><th>最高分月份</th><th>最低分月份</th></tr></thead>
+      <tbody><tr>
+        <td class="kpi-num" id="pr-avg">—</td>
+        <td class="kpi-num" id="pr-grade">—</td>
+        <td class="kpi-num" id="pr-max-month">—</td>
+        <td class="kpi-num" id="pr-min-month">—</td>
+      </tr></tbody>
+    </table>
+  </div>
+    <div class="card">
+      <div class="card-title">月度绩效评分结果</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>月份</th><th>综合得分</th><th>评级</th><th>财务维度</th>
+              <th>文化传承</th><th>运营效率</th><th>社会影响</th><th>旺季</th>
+            </tr>
+          </thead>
+          <tbody id="perf-result-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">绩效改进矩阵建议</div>
+      <div id="perf-matrix-advice"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 4: 综合看板 ===================== -->
+<div class="page" id="page-dashboard">
+  <div class="hero">
+    <h1>综合数据看板</h1>
+    <p>三套工具数据一屏汇总 · 成本-ROI-绩效全链路呈现</p>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">成本结构概览</div>
+      <canvas id="chart-cost-pie" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">月度成本趋势</div>
+      <canvas id="chart-cost-trend" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">ROI综合对比</div>
+      <canvas id="chart-roi-bar" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">绩效月度趋势</div>
+      <canvas id="chart-perf-trend" height="260"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">综合健康度摘要</div>
+    <div id="dashboard-summary" class="grid-3"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const S = {
+  costParams: {
+    国家级:{base:300,premium:0.6,bonus:0.12},
+    省级:{base:180,premium:0.35,bonus:0.08},
+    市级:{base:120,premium:0.20,bonus:0.05},
+    区级:{base:80,premium:0.10,bonus:0.03},
+    普通:{base:50,premium:0,bonus:0}
+  },
+  monthlyCost: Array.from({length:12},(_,i)=>({month:i+1,c1:0,c2:0,c3:0,c4:0,c5:0,c6:0,c7:0,c8:0})),
+  laborRows:[],
+  ceremonyRows:[],
+  channels:[
+    {name:'抖音新媒体',cost:0,rev:0,bench:1.2},
+    {name:'微信公众号',cost:0,rev:0,bench:1.2},
+    {name:'线下地推',cost:0,rev:0,bench:1.0},
+    {name:'传统媒体广告',cost:0,rev:0,bench:0.8}
+  ],
+  experiences:[
+    {name:'鱼皮画体验课',dc:0,ic:0,rev:0},
+    {name:'冬捕体验活动',dc:0,ic:0,rev:0},
+    {name:'非遗手作工坊',dc:0,ic:0,rev:0}
+  ],
+  retentions:[
+    {type:'用户复购',rev:0,cost:0,bench:1.5},
+    {type:'周边产品销售',rev:0,cost:0,bench:2.0},
+    {type:'口碑引流转化',rev:0,cost:0,bench:3.0}
+  ],
+  perfBaseline:{
+    月度营收:{val:500000,weight:0.10,dim:'财务'},
+    ROI:{val:1.2,weight:0.10,dim:'财务'},
+    毛利率:{val:45,weight:0.08,dim:'财务'},
+    现金流健康度:{val:0.8,weight:0.07,dim:'财务'},
+    传承人授徒时长:{val:40,weight:0.10,dim:'文化'},
+    非遗技艺展示次数:{val:8,weight:0.09,dim:'文化'},
+    非遗衍生品原创率:{val:60,weight:0.08,dim:'文化'},
+    技艺资料数字化率:{val:70,weight:0.08,dim:'文化'},
+    游客转化率:{val:30,weight:0.08,dim:'运营'},
+    客单价:{val:150,weight:0.07,dim:'运营'},
+    媒体曝光量:{val:20,weight:0.08,dim:'社会'},
+    公众满意度:{val:4.5,weight:0.07,dim:'社会'}
+  },
+  perfMonthly: Array.from({length:12},(_,i)=>({month:i+1,营收:0,ROI:0,毛利率:0,现金流:0,授徒:0,展示:0,原创率:0,数字化率:0,转化率:0,客单价:0,曝光:0,满意度:0}))
+};
+
+// ============================================================
+// PAGE / TAB SWITCH
+// ============================================================
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const idx={cost:0,roi:1,perf:2,dashboard:3}[name];
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  if(name==='dashboard') updateDashboard();
+}
+function switchTab(page,name,el){
+  const parent=document.getElementById('page-'+page)||document.body;
+  parent.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  parent.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById(page+'-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+const fmt = n=>isNaN(n)||!isFinite(n)?'—':Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});
+const fmtPct = n=>isNaN(n)||!isFinite(n)?'—':Number(n).toFixed(1)+'%';
+const fmtROI = n=>isNaN(n)||!isFinite(n)?'—':Number(n).toFixed(2);
+function v(id){return parseFloat(document.getElementById(id)?.value)||0;}
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+// 防抖：把频繁调用打包成一次
+function debounce(fn,ms=300){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),ms)};}
+function statusBadge(roi,bench){
+  if(roi<0.8) return '<span class="badge badge-danger">🔴 高风险</span>';
+  if(roi<bench) return '<span class="badge badge-warn">🟡 待优化</span>';
+  return '<span class="badge badge-success">🟢 健康</span>';
+}
+function gradeLabel(score){
+  if(score>=90) return {g:'优秀',cls:'badge-success'};
+  if(score>=80) return {g:'良好',cls:'badge-info'};
+  if(score>=70) return {g:'合格',cls:'badge-warn'};
+  return {g:'不合格',cls:'badge-danger'};
+}
+
+// ============================================================
+// INIT COST PAGE
+// ============================================================
+function initCostPage(){
+  // Monthly cost table
+  const tbody=document.getElementById('monthly-cost-body');
+  tbody.innerHTML='';
+  S.monthlyCost.forEach((row,i)=>{
+    const cols=['c1','c2','c3','c4','c5','c6','c7','c8'];
+    const tds=cols.map(c=>`<td><input type="number" value="${row[c]||''}" min="0" placeholder="0" onblur="updateMonthlyCost(${i},'${c}',this.value)"></td>`).join('');
+    tbody.innerHTML+=`<tr><td><b>${row.month}月</b></td>${tds}<td id="mc-total-${i}">0</td></tr>`;
+  });
+  calcCost();
+  initParamGrid();
+  renderPriceRef();
+  initLaborRows();
+  initCeremonyRows();
+}
+
+function initParamGrid(){
+  const grid=document.getElementById('param-grid');
+  grid.innerHTML='';
+  Object.entries(S.costParams).forEach(([level,p])=>{
+    grid.innerHTML+=`
+    <div class="card" style="margin:0;padding:14px">
+      <div style="font-weight:700;color:var(--primary-dark);margin-bottom:10px">${level}传承人</div>
+      <div class="form-group"><label>基础单价(元/h)</label><input type="number" value="${p.base}" onblur="S.costParams['${level}'].base=+this.value;renderPriceRef();recalcLaborAll()"></div>
+      <div class="form-group"><label>技艺溢价系数</label><input type="number" step="0.01" value="${p.premium}" onblur="S.costParams['${level}'].premium=+this.value;renderPriceRef();recalcLaborAll()"></div>
+      <div class="form-group"><label>项目分红比例</label><input type="number" step="0.01" value="${p.bonus}" onblur="S.costParams['${level}'].bonus=+this.value;renderPriceRef();recalcLaborAll()"></div>
+    </div>`;
+  });
+}
+
+function renderPriceRef(){
+  const tbody=document.getElementById('price-ref-body');
+  tbody.innerHTML='';
+  Object.entries(S.costParams).forEach(([level,p])=>{
+    tbody.innerHTML+=`<tr><td>${level}</td><td>${p.base}</td><td>${(p.premium*100).toFixed(0)}%</td><td>${(p.bonus*100).toFixed(0)}%</td></tr>`;
+  });
+}
+
+function updateMonthlyCost(i,col,val){
+  S.monthlyCost[i][col]=parseFloat(val)||0;
+  debouncedCalcCost();
+}
+const debouncedCalcCost=debounce(calcCost,200);
+const debouncedCalcROI=debounce(calcROI,200);
+
+function calcCost(){
+  const colKeys=['c1','c2','c3','c4','c5','c6','c7','c8'];
+  const colSums=Array(8).fill(0);
+  let grandTotal=0;
+  S.monthlyCost.forEach((row,i)=>{
+    let rowTotal=0;
+    colKeys.forEach((k,j)=>{rowTotal+=row[k];colSums[j]+=row[k];});
+    grandTotal+=rowTotal;
+    const el=document.getElementById('mc-total-'+i);
+    if(el) el.textContent=fmt(rowTotal);
+  });
+  colSums.forEach((s,j)=>setText('at-c'+(j+1),fmt(s)));
+  setText('at-total',fmt(grandTotal));
+
+  // ceremony
+  const ceremonyCost=S.ceremonyRows.reduce((a,r)=>a+(parseFloat(r.amount)||0),0);
+  // labor
+  recalcLaborAll();
+  const laborTotal=S.laborRows.reduce((a,r)=>{
+    const lv=r.level||'普通';
+    const p=S.costParams[lv]||S.costParams['普通'];
+    const h=r.hours||0, rev=r.revenue||0;
+    return a+(h*p.base)*(1+p.premium)+rev*p.bonus;
+  },0);
+
+  const cultureCost=colSums[0];
+  const cultureRatio=grandTotal>0?(cultureCost/grandTotal*100):0;
+  const ceremonyRatio=cultureCost>0?(ceremonyCost/cultureCost*100):0;
+  const benchmark=parseFloat(document.getElementById('param-culture-ratio')?.value)||32;
+  const ceremonyBench=parseFloat(document.getElementById('param-ceremony-ratio')?.value)||20;
+
+  setText('k-total-cost',fmt(grandTotal));
+  setText('k-culture-cost',fmt(cultureCost));
+  setText('k-culture-ratio',fmtPct(cultureRatio));
+  setText('k-ceremony-cost',fmt(ceremonyCost));
+  setText('k-ceremony-ratio',fmtPct(ceremonyRatio));
+  setText('k-labor-total',fmt(laborTotal));
+
+  // compliance alerts
+  const alerts=[];
+  if(grandTotal>0 && cultureRatio<benchmark) alerts.push({type:'warn',msg:`⚠ 文化传承成本占比 ${cultureRatio.toFixed(1)}% 低于基准 ${benchmark}%，请增加文化传承投入`});
+  else if(grandTotal>0) alerts.push({type:'success',msg:`✅ 文化传承成本占比 ${cultureRatio.toFixed(1)}%，已达标（基准 ${benchmark}%）`});
+  if(cultureCost>0 && ceremonyRatio<ceremonyBench) alerts.push({type:'warn',msg:`⚠ 核心仪式成本占比 ${ceremonyRatio.toFixed(1)}% 低于基准 ${ceremonyBench}%，需补充核心仪式投入`});
+  else if(cultureCost>0) alerts.push({type:'success',msg:`✅ 核心仪式成本占比 ${ceremonyRatio.toFixed(1)}%，合规达标（基准 ${ceremonyBench}%）`});
+
+  document.getElementById('cost-compliance-alerts').innerHTML=alerts.map(a=>`<div class="alert alert-${a.type}"><span class="alert-icon">${a.type==='success'?'✅':'⚠️'}</span><span>${a.msg}</span></div>`).join('');
+}
+
+// ============================================================
+// LABOR ROWS
+// ============================================================
+function initLaborRows(){
+  if(S.laborRows.length===0){
+    S.laborRows=[
+      {month:1,name:'张某',level:'省级',hours:85,project:'冬捕节指导',revenue:1560000},
+      {month:1,name:'李某',level:'市级',hours:60,project:'技艺展示',revenue:850000}
+    ];
+  }
+  renderLaborTable();
+}
+function addLaborRow(){
+  S.laborRows.push({month:1,name:'',level:'市级',hours:0,project:'',revenue:0});
+  renderLaborTable();
+}
+function renderLaborTable(){
+  const tbody=document.getElementById('labor-body');
+  tbody.innerHTML='';
+  S.laborRows.forEach((r,i)=>{
+    const p=S.costParams[r.level]||S.costParams['普通'];
+    const baseLab=(r.hours||0)*p.base;
+    const premium=baseLab*p.premium;
+    const bonus=(r.revenue||0)*p.bonus;
+    const total=baseLab+premium+bonus;
+    const levels=Object.keys(S.costParams).map(l=>`<option${l===r.level?' selected':''}>${l}</option>`).join('');
+    tbody.innerHTML+=`<tr data-idx="${i}">
+      <td><input type="number" value="${r.month}" min="1" max="12" oninput="S.laborRows[${i}].month=+this.value"></td>
+      <td><input type="text" value="${r.name.replace(/"/g,'&quot;')}" oninput="S.laborRows[${i}].name=this.value"></td>
+      <td><select onchange="S.laborRows[${i}].level=this.value;recalcLaborRow(${i})">${levels}</select></td>
+      <td><input type="number" value="${r.hours}" min="0" oninput="S.laborRows[${i}].hours=+this.value;recalcLaborRow(${i})"></td>
+      <td><input type="number" value="${r.revenue}" min="0" oninput="S.laborRows[${i}].revenue=+this.value;recalcLaborRow(${i})"></td>
+      <td data-role="base">${fmt(baseLab)}</td>
+      <td data-role="premium">${fmt(premium)}</td>
+      <td data-role="bonus">${fmt(bonus)}</td>
+      <td data-role="total" style="font-weight:700;color:var(--primary-dark)">${fmt(total)}</td>
+      <td><button class="del-btn" onclick="S.laborRows.splice(${i},1);renderLaborTable()">×</button></td>
+    </tr>`;
+  });
+}
+function recalcLaborRow(idx){
+  const r=S.laborRows[idx]; if(!r) return;
+  const p=S.costParams[r.level]||S.costParams['普通'];
+  const baseLab=(r.hours||0)*p.base;
+  const premium=baseLab*p.premium;
+  const bonus=(r.revenue||0)*p.bonus;
+  const total=baseLab+premium+bonus;
+  const tr=document.querySelector(`#labor-body tr[data-idx="${idx}"]`);
+  if(!tr) return;
+  tr.querySelectorAll('[data-role]').forEach(td=>{
+    const role=td.dataset.role;
+    if(role==='base') td.textContent=fmt(baseLab);
+    if(role==='premium') td.textContent=fmt(premium);
+    if(role==='bonus') td.textContent=fmt(bonus);
+    if(role==='total') td.textContent=fmt(total);
+  });
+  debouncedCalcCost();
+}
+function recalcLaborAll(){renderLaborTable();debouncedCalcCost();}
+
+// ============================================================
+// CEREMONY ROWS
+// ============================================================
+function initCeremonyRows(){
+  if(S.ceremonyRows.length===0){
+    S.ceremonyRows=[
+      {name:'开网祭江仪式',date:'2025-01-05',item:'祭品费',amount:12000,voucher:'PZ001',person:'张某'},
+      {name:'头鱼祈福仪式',date:'2025-01-08',item:'道具费',amount:3500,voucher:'PZ002',person:'张某'}
+    ];
+  }
+  renderCeremonyTable();
+}
+function addCeremonyRow(){
+  S.ceremonyRows.push({name:'',date:'',item:'',amount:0,voucher:'',person:''});
+  renderCeremonyTable();
+}
+function renderCeremonyTable(){
+  const tbody=document.getElementById('ceremony-body');
+  tbody.innerHTML='';
+  S.ceremonyRows.forEach((r,i)=>{
+    tbody.innerHTML+=`<tr>
+      <td><input type="text" value="${r.name}" onblur="S.ceremonyRows[${i}].name=this.value;debouncedCalcCost()"></td>
+      <td><input type="text" value="${r.date}" placeholder="YYYY-MM-DD" onblur="S.ceremonyRows[${i}].date=this.value;debouncedCalcCost()"></td>
+      <td><input type="text" value="${r.item}" onblur="S.ceremonyRows[${i}].item=this.value;debouncedCalcCost()"></td>
+      <td><input type="number" value="${r.amount}" min="0" onblur="S.ceremonyRows[${i}].amount=+this.value;debouncedCalcCost()"></td>
+      <td><input type="text" value="${r.voucher}" onblur="S.ceremonyRows[${i}].voucher=this.value;debouncedCalcCost()"></td>
+      <td><input type="text" value="${r.person}" onblur="S.ceremonyRows[${i}].person=this.value;debouncedCalcCost()"></td>
+      <td><button class="del-btn" onclick="S.ceremonyRows.splice(${i},1);renderCeremonyTable();debouncedCalcCost()">×</button></td>
+    </tr>`;
+  });
+  debouncedCalcCost();
+}
+
+// ============================================================
+// ROI CALCULATIONS
+// ============================================================
+function initROIPage(){
+  renderChannelTable();
+  renderExperienceTable();
+  renderRetentionTable();
+}
+
+function calcROI(){
+  const revenue=v('roi-revenue'), cost=v('roi-cost');
+  const alpha=v('roi-alpha'), beta=v('roi-beta'), gamma=v('roi-gamma');
+  if(!revenue||!cost||cost===0){
+    ['r-base-roi','r-corrected-roi','r-profit','r-project-status'].forEach(id=>setText(id,'—'));
+    return;
+  }
+  const baseROI=(revenue-cost)/cost;
+  const corrROI=baseROI*(1+alpha)+beta*gamma;
+  const profit=revenue-cost;
+  setText('r-base-roi',fmtROI(baseROI));
+  setText('r-corrected-roi',fmtROI(corrROI));
+  setText('r-profit',fmtROI(profit));
+  let status='—';
+  if(baseROI<0) status='🔴 项目亏损';
+  else if(baseROI<1) status='🔴 低于盈亏平衡';
+  else if(baseROI<1.2) status='🟡 低于行业平均';
+  else status='🟢 表现良好';
+  setText('r-project-status',status);
+
+  calcChannelROI();
+  calcExperienceROI();
+  calcRetentionROI();
+  renderWarnBoard();
+}
+
+function renderChannelTable(){
+  const tbody=document.getElementById('channel-body');
+  tbody.innerHTML='';
+  S.channels.forEach((ch,i)=>{
+    const roi=ch.cost>0?(ch.rev-ch.cost)/ch.cost:NaN;
+    tbody.innerHTML+=`<tr>
+      <td><input type="text" value="${ch.name}" onblur="S.channels[${i}].name=this.value"></td>
+      <td><input type="number" value="${ch.cost||''}" min="0" placeholder="0" onblur="S.channels[${i}].cost=+this.value;calcChannelROI()"></td>
+      <td><input type="number" value="${ch.rev||''}" min="0" placeholder="0" onblur="S.channels[${i}].rev=+this.value;calcChannelROI()"></td>
+      <td id="ch-roi-${i}">${isNaN(roi)?'—':roi.toFixed(2)}</td>
+      <td>${ch.bench}</td>
+      <td id="ch-status-${i}">${isNaN(roi)?'—':statusBadge(roi,ch.bench)}</td>
+    </tr>`;
+  });
+}
+
+function addChannelRow(){
+  S.channels.push({name:'新渠道',cost:0,rev:0,bench:1.2});
+  renderChannelTable();
+}
+
+function calcChannelROI(){
+  let totalCost=0,totalRev=0;
+  S.channels.forEach((ch,i)=>{
+    const roi=ch.cost>0?(ch.rev-ch.cost)/ch.cost:NaN;
+    setText('ch-roi-'+i,isNaN(roi)?'—':roi.toFixed(2));
+    document.getElementById('ch-status-'+i).innerHTML=isNaN(roi)?'—':statusBadge(roi,ch.bench);
+    totalCost+=ch.cost;totalRev+=ch.rev;
+  });
+  setText('ch-cost-sum',fmtROI(totalCost));
+  setText('ch-rev-sum',fmtROI(totalRev));
+  const sumROI=totalCost>0?(totalRev-totalCost)/totalCost:NaN;
+  setText('ch-roi-sum',isNaN(sumROI)?'—':sumROI.toFixed(2));
+  document.getElementById('ch-status-sum').innerHTML=isNaN(sumROI)?'—':statusBadge(sumROI,1.2);
+  renderWarnBoard();
+}
+
+function renderExperienceTable(){
+  const tbody=document.getElementById('experience-body');
+  tbody.innerHTML='';
+  S.experiences.forEach((ex,i)=>{
+    const tc=ex.dc+ex.ic;
+    const roi=tc>0?(ex.rev-tc)/tc:NaN;
+    tbody.innerHTML+=`<tr>
+      <td><input type="text" value="${ex.name}" onblur="S.experiences[${i}].name=this.value"></td>
+      <td><input type="number" value="${ex.dc||''}" min="0" placeholder="0" onblur="S.experiences[${i}].dc=+this.value;calcExperienceROI()"></td>
+      <td><input type="number" value="${ex.ic||''}" min="0" placeholder="0" onblur="S.experiences[${i}].ic=+this.value;calcExperienceROI()"></td>
+      <td><input type="number" value="${ex.rev||''}" min="0" placeholder="0" onblur="S.experiences[${i}].rev=+this.value;calcExperienceROI()"></td>
+      <td id="ex-roi-${i}">${isNaN(roi)?'—':roi.toFixed(2)}</td>
+      <td id="ex-status-${i}">—</td>
+    </tr>`;
+  });
+}
+
+function addExperienceRow(){
+  S.experiences.push({name:'新体验项目',dc:0,ic:0,rev:0});
+  renderExperienceTable();
+}
+
+function calcExperienceROI(){
+  const baseROI=v('roi-revenue')&&v('roi-cost')?(v('roi-revenue')-v('roi-cost'))/v('roi-cost'):null;
+  let tdc=0,tic=0,trev=0;
+  S.experiences.forEach((ex,i)=>{
+    const tc=ex.dc+ex.ic;
+    const roi=tc>0?(ex.rev-tc)/tc:NaN;
+    setText('ex-roi-'+i,isNaN(roi)?'—':roi.toFixed(2));
+    const el=document.getElementById('ex-status-'+i);
+    if(isNaN(roi)||baseROI===null){el.innerHTML='—';}
+    else{el.innerHTML=roi>=baseROI?'<span class="badge badge-success">🟢 健康</span>':'<span class="badge badge-warn">🟡 待优化</span>';}
+    tdc+=ex.dc;tic+=ex.ic;trev+=ex.rev;
+  });
+  setText('ex-dc-sum',fmtROI(tdc));setText('ex-ic-sum',fmtROI(tic));setText('ex-rev-sum',fmtROI(trev));
+  const tc=tdc+tic;
+  const sumROI=tc>0?(trev-tc)/tc:NaN;
+  setText('ex-roi-sum',isNaN(sumROI)?'—':sumROI.toFixed(2));
+  document.getElementById('ex-status-sum').innerHTML=isNaN(sumROI)||baseROI===null?'—':statusBadge(sumROI,baseROI);
+  renderWarnBoard();
+}
+
+function renderRetentionTable(){
+  const tbody=document.getElementById('retention-body');
+  tbody.innerHTML='';
+  S.retentions.forEach((r,i)=>{
+    const roi=r.cost>0?(r.rev-r.cost)/r.cost:NaN;
+    tbody.innerHTML+=`<tr>
+      <td>${r.type}</td>
+      <td><input type="number" value="${r.rev||''}" min="0" placeholder="0" onblur="S.retentions[${i}].rev=+this.value;calcRetentionROI()"></td>
+      <td><input type="number" value="${r.cost||''}" min="0" placeholder="0" onblur="S.retentions[${i}].cost=+this.value;calcRetentionROI()"></td>
+      <td id="ret-roi-${i}">${isNaN(roi)?'—':roi.toFixed(2)}</td>
+      <td>${r.bench}</td>
+      <td id="ret-status-${i}">${isNaN(roi)?'—':statusBadge(roi,r.bench)}</td>
+    </tr>`;
+  });
+}
+
+function calcRetentionROI(){
+  S.retentions.forEach((r,i)=>{
+    const roi=r.cost>0?(r.rev-r.cost)/r.cost:NaN;
+    setText('ret-roi-'+i,isNaN(roi)?'—':roi.toFixed(2));
+    document.getElementById('ret-status-'+i).innerHTML=isNaN(roi)?'—':statusBadge(roi,r.bench);
+  });
+}
+
+function renderWarnBoard(){
+  const revenue=v('roi-revenue'),cost=v('roi-cost');
+  const baseROI=cost>0?(revenue-cost)/cost:null;
+  const channelType=document.getElementById('roi-channel-type')?.value||'新媒体';
+  const alerts=[];
+  const decisions=[];
+
+  if(baseROI!==null){
+    if(baseROI<1) alerts.push({type:'danger',msg:`项目基础ROI ${baseROI.toFixed(2)} < 1，项目亏损，建议全面复盘成本结构与营收来源`});
+    else if(baseROI<1.2) alerts.push({type:'warn',msg:`项目基础ROI ${baseROI.toFixed(2)} 低于行业平均1.2，建议优化全链路效率`});
+    else alerts.push({type:'success',msg:`项目基础ROI ${baseROI.toFixed(2)} 良好（≥1.2），可考虑扩大规模`});
+    // decision
+    if(baseROI<1) decisions.push('📌 整体决策：项目亏损，立即启动成本结构全面复盘，优先削减行政管理与营销推广成本');
+    else if(baseROI<1.2) decisions.push('📌 整体决策：盈利但低于行业基准，建议优化全链路，重点提升转化体验期ROI');
+    else decisions.push('📌 整体决策：项目表现良好，建议扩大规模、复制成功经验');
+  }
+
+  S.channels.forEach(ch=>{
+    const roi=ch.cost>0?(ch.rev-ch.cost)/ch.cost:null;
+    if(roi===null) return;
+    if(roi<0.8){
+      alerts.push({type:'danger',msg:`渠道「${ch.name}」ROI ${roi.toFixed(2)} < 0.8，高风险`});
+      if(ch.name.includes('传统')||channelType==='传统媒体') decisions.push(`📌 渠道「${ch.name}」：削减预算50%转移至新媒体`);
+      else if(ch.name.includes('抖音')||ch.name.includes('微信')||channelType==='新媒体') decisions.push(`📌 渠道「${ch.name}」：优化内容策略，开展A/B测试`);
+      else decisions.push(`📌 渠道「${ch.name}」：暂停投放并进行全面复盘`);
+    } else if(roi<1.2){
+      alerts.push({type:'warn',msg:`渠道「${ch.name}」ROI ${roi.toFixed(2)} 待优化（0.8-1.2）`});
+      decisions.push(`📌 渠道「${ch.name}」：维持预算，优化转化路径（检查落地页速度、表单字段数）`);
+    } else {
+      alerts.push({type:'success',msg:`渠道「${ch.name}」ROI ${roi.toFixed(2)} 健康（≥1.2）`});
+      decisions.push(`📌 渠道「${ch.name}」：加大投入20%，扩展相似目标人群`);
+    }
+  });
+
+  S.experiences.forEach(ex=>{
+    const tc=ex.dc+ex.ic;
+    const roi=tc>0?(ex.rev-tc)/tc:null;
+    if(roi===null||baseROI===null) return;
+    if(roi<baseROI){
+      alerts.push({type:'warn',msg:`体验环节「${ex.name}」ROI ${roi.toFixed(2)} 低于项目整体ROI ${baseROI.toFixed(2)}`});
+      decisions.push(`📌 体验「${ex.name}」：重新定价或降低成本；选项A：客单价提升10%；选项B：削减间接成本15%`);
+    } else {
+      alerts.push({type:'success',msg:`体验环节「${ex.name}」ROI ${roi.toFixed(2)} 健康，高于整体ROI`});
+      decisions.push(`📌 体验「${ex.name}」：作为核心产品重点推广，开发进阶课程提升用户LTV`);
+    }
+  });
+
+  document.getElementById('warn-alerts').innerHTML=alerts.map(a=>`<div class="alert alert-${a.type}"><span class="alert-icon">${a.type==='success'?'✅':a.type==='warn'?'⚠️':'🚨'}</span><span>${a.msg}</span></div>`).join('');
+  document.getElementById('warn-decisions').innerHTML=`<div style="background:#f5f0e8;border-radius:8px;padding:16px;margin-top:8px"><div style="font-weight:700;color:var(--primary-dark);margin-bottom:10px">🧭 智能决策建议</div>${decisions.map(d=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)">${d}</div>`).join('')}</div>`;
+}
+
+// ============================================================
+// PERF PAGE
+// ============================================================
+function initPerfPage(){
+  const tbody=document.getElementById('perf-monthly-body');
+  tbody.innerHTML='';
+  S.perfMonthly.forEach((row,i)=>{
+    const keys=['营收','ROI','毛利率','现金流','授徒','展示','原创率','数字化率','转化率','客单价','曝光','满意度'];
+    const tds=keys.map((k,j)=>`<td><input type="number" value="${row[k]||''}" placeholder="0" onblur="S.perfMonthly[${i}]['${k}']=+this.value;calcPerfAll()"></td>`).join('');
+    tbody.innerHTML+=`<tr><td><b>${row.month}月</b></td>${tds}</tr>`;
+  });
+  initPerfConfig();
+  calcPerfAll();
+}
+
+function initPerfConfig(){
+  // weight grid
+  const wgrid=document.getElementById('perf-weight-grid');
+  const dims={财务:['月度营收','ROI','毛利率','现金流健康度'],文化:['传承人授徒时长','非遗技艺展示次数','非遗衍生品原创率','技艺资料数字化率'],运营:['游客转化率','客单价'],社会:['媒体曝光量','公众满意度']};
+  const dimWeights={财务:35,文化:35,运营:15,社会:15};
+  wgrid.innerHTML=Object.entries(dimWeights).map(([d,w])=>`
+    <div class="form-group">
+      <label>${d}维度权重(%)</label>
+      <input type="number" value="${w}" min="0" max="100" onblur="calcPerfAll()">
+    </div>`).join('');
+  // baseline
+  const bgrid=document.getElementById('perf-baseline-grid');
+  bgrid.innerHTML=Object.entries(S.perfBaseline).map(([k,v])=>`
+    <div class="form-group">
+      <label>${k} 基准值</label>
+      <input type="number" value="${v.val}" step="any" onblur="S.perfBaseline['${k}'].val=+this.value;calcPerfAll()">
+    </div>`).join('');
+}
+
+function getPeakMonths(){
+  return (document.getElementById('peak-months')?.value||'12,1,2').split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+}
+
+function calcMonthScore(row,month){
+  const peaks=getPeakMonths();
+  const isPeak=peaks.includes(month);
+  const peakRev=1+(parseFloat(document.getElementById('peak-rev')?.value)||80)/100;
+  const peakROI=1+(parseFloat(document.getElementById('peak-roi')?.value)||50)/100;
+  const peakMarg=1+(parseFloat(document.getElementById('peak-margin')?.value)||20)/100;
+  const peakPrice=1+(parseFloat(document.getElementById('peak-price')?.value)||30)/100;
+  const adjustMap={'月度营收':peakRev,'ROI':peakROI,'毛利率':peakMarg,'客单价':peakPrice};
+  const keyMap={
+    '月度营收':row.营收,'ROI':row.ROI,'毛利率':row.毛利率,'现金流健康度':row.现金流,
+    '传承人授徒时长':row.授徒,'非遗技艺展示次数':row.展示,'非遗衍生品原创率':row.原创率,
+    '技艺资料数字化率':row.数字化率,'游客转化率':row.转化率,'客单价':row.客单价,
+    '媒体曝光量':row.曝光,'公众满意度':row.满意度
+  };
+  let dimScores={财务:0,文化:0,运营:0,社会:0};
+  Object.entries(S.perfBaseline).forEach(([k,p])=>{
+    let baseline=p.val;
+    if(isPeak && adjustMap[k]) baseline*=adjustMap[k];
+    const raw=keyMap[k]||0;
+    const score=Math.min(raw/baseline*100,120);
+    dimScores[p.dim]+=(score*p.weight);
+  });
+  const total=dimScores.财务+dimScores.文化+dimScores.运营+dimScores.社会;
+  return {total,dimScores,isPeak};
+}
+
+function calcPerfAll(){
+  const results=S.perfMonthly.map((row,i)=>{
+    const {total,dimScores,isPeak}=calcMonthScore(row,row.month);
+    return {month:row.month,total,dimScores,isPeak};
+  });
+  const tbody=document.getElementById('perf-result-body');
+  tbody.innerHTML='';
+  results.forEach(r=>{
+    const {g,cls}=gradeLabel(r.total);
+    tbody.innerHTML+=`<tr>
+      <td><b>${r.month}月</b></td>
+      <td style="font-weight:700">${r.total.toFixed(1)}</td>
+      <td><span class="badge ${cls}">${g}</span></td>
+      <td>${(r.dimScores.财务*100/35).toFixed(0)}%</td>
+      <td>${(r.dimScores.文化*100/35).toFixed(0)}%</td>
+      <td>${(r.dimScores.运营*100/15).toFixed(0)}%</td>
+      <td>${(r.dimScores.社会*100/15).toFixed(0)}%</td>
+      <td>${r.isPeak?'<span class="badge badge-warn">旺季</span>':''}</td>
+    </tr>`;
+  });
+  const scores=results.map(r=>r.total);
+  const validScores=scores.filter(s=>s>0);
+  if(validScores.length>0){
+    const avg=validScores.reduce((a,b)=>a+b,0)/validScores.length;
+    const maxIdx=scores.indexOf(Math.max(...scores));
+    const minIdx=scores.indexOf(Math.min(...scores));
+    setText('pr-avg',avg.toFixed(1));
+    const {g,cls}=gradeLabel(avg);
+    document.getElementById('pr-grade').innerHTML=`<span class="badge ${cls}">${g}</span>`;
+    setText('pr-max-month',`${scores.indexOf(Math.max(...scores))+1}月`);
+    setText('pr-min-month',`${scores.indexOf(Math.min(...scores))+1}月`);
+    // matrix advice
+    const matrixHtml=buildMatrixAdvice(results);
+    document.getElementById('perf-matrix-advice').innerHTML=matrixHtml;
+  }
+}
+
+function buildMatrixAdvice(results){
+  const scores=results.map(r=>r.total);
+  const avgScore=scores.filter(s=>s>0).reduce((a,b)=>a+b,0)/Math.max(scores.filter(s=>s>0).length,1);
+  const advice=[];
+  if(avgScore>=90) advice.push({cls:'alert-success',text:'高绩效-高潜力：综合得分优秀，建议保持投入，打造标杆案例，将成功经验复制到其他非遗项目'});
+  else if(avgScore>=80) advice.push({cls:'alert-info',text:'高绩效-低潜力：整体运营健康，建议优化成本结构，挖掘存量价值，避免过度投入'});
+  else if(avgScore>=70) advice.push({cls:'alert-warn',text:'低绩效-高潜力：基本达标但有改进空间，建议加大资源投入，重点突破短板维度，快速提升绩效'});
+  else advice.push({cls:'alert-danger',text:'低绩效-低潜力：存在重大运营风险，建议重新评估业务模式，必要时进行业务调整'});
+  return advice.map(a=>`<div class="alert ${a.cls}"><span class="alert-icon">🧭</span><span>${a.text}</span></div>`).join('');
+}
+
+function calcInheritorScore(){
+  const mastery=v('inh-mastery'),active=v('inh-active'),innov=v('inh-innovation'),infl=v('inh-influence');
+  if(!mastery&&!active&&!innov&&!infl) return;
+  const score=(mastery*0.3+active*0.25+innov*0.25+infl*0.2)*10;
+  setText('ir-mastery',(mastery*0.3*10).toFixed(1));
+  setText('ir-active',(active*0.25*10).toFixed(1));
+  setText('ir-innovation',(innov*0.25*10).toFixed(1));
+  setText('ir-influence',(infl*0.2*10).toFixed(1));
+  setText('inh-score-num',score.toFixed(1));
+  const g=gradeLabel(score);
+  setText('inh-score-grade',g.g+'级');
+}
+
+// ============================================================
+// DASHBOARD CHARTS (inline canvas drawing)
+// ============================================================
+function updateDashboard(){
+  drawCostPie();
+  drawCostTrend();
+  drawROIBar();
+  drawPerfTrend();
+  buildSummary();
+}
+
+function clearCanvas(id){
+  const c=document.getElementById(id);
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  c.width=c.offsetWidth||400;
+  return {c,ctx};
+}
+
+function drawCostPie(){
+  const {c,ctx}=clearCanvas('chart-cost-pie');
+  const colSums=Array(8).fill(0);
+  S.monthlyCost.forEach(row=>{
+    ['c1','c2','c3','c4','c5','c6','c7','c8'].forEach((k,j)=>colSums[j]+=row[k]);
+  });
+  const labels=['文化传承','运营服务','场地设施','营销推广','行政管理','设备耗材','税费规费','其他'];
+  const colors=['#c8622a','#e8845a','#d4a017','#2d7a4a','#1a6b8a','#7a3a8a','#a08060','#c0c0c0'];
+  const total=colSums.reduce((a,b)=>a+b,0);
+  if(total===0){ctx.fillStyle='#ccc';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('暂无数据',c.width/2,c.height/2);return;}
+  let start=0;
+  const cx=c.width/2,cy=c.height/2-10,r=Math.min(cx,cy)-50;
+  colSums.forEach((v,i)=>{
+    if(v===0) return;
+    const angle=v/total*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+angle);
+    ctx.fillStyle=colors[i];ctx.fill();
+    // label
+    const mid=start+angle/2;
+    if(v/total>0.04){
+      ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText(labels[i],cx+Math.cos(mid)*(r*0.65),cy+Math.sin(mid)*(r*0.65)+4);
+    }
+    start+=angle;
+  });
+  // legend
+  let lx=8,ly=c.height-45;
+  ctx.font='11px sans-serif';ctx.textAlign='left';
+  labels.forEach((l,i)=>{
+    if(colSums[i]===0) return;
+    ctx.fillStyle=colors[i];ctx.fillRect(lx,ly,10,10);
+    ctx.fillStyle='#444';ctx.fillText(l,lx+13,ly+9);
+    lx+=70;if(lx>c.width-60){lx=8;ly+=14;}
+  });
+}
+
+function drawCostTrend(){
+  const {c,ctx}=clearCanvas('chart-cost-trend');
+  const totals=S.monthlyCost.map(row=>['c1','c2','c3','c4','c5','c6','c7','c8'].reduce((a,k)=>a+row[k],0));
+  const culture=S.monthlyCost.map(row=>row.c1);
+  const maxV=Math.max(...totals,...culture,1);
+  const pad={l:50,r:20,t:20,b:40};
+  const w=c.width-pad.l-pad.r,h=c.height-pad.t-pad.b;
+  // axes
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+h*(1-i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+w,y);ctx.stroke();
+    ctx.fillStyle='#888';ctx.font='10px sans-serif';ctx.textAlign='right';
+    ctx.fillText((maxV/4*i/10000).toFixed(0)+'万',pad.l-4,y+4);
+  }
+  // bars
+  const bw=w/12*0.6,gap=w/12;
+  totals.forEach((v,i)=>{
+    const bh=v/maxV*h;
+    ctx.fillStyle='rgba(200,98,42,0.6)';
+    ctx.fillRect(pad.l+i*gap+(gap-bw)/2,pad.t+h-bh,bw,bh);
+    // culture overlay
+    const ch=culture[i]/maxV*h;
+    ctx.fillStyle='rgba(212,160,23,0.9)';
+    ctx.fillRect(pad.l+i*gap+(gap-bw)/2,pad.t+h-ch,bw,ch);
+    // x label
+    ctx.fillStyle='#666';ctx.font='10px sans-serif';ctx.textAlign='center';
+    ctx.fillText((i+1)+'月',pad.l+i*gap+gap/2,pad.t+h+14);
+  });
+  // legend
+  ctx.fillStyle='rgba(200,98,42,0.6)';ctx.fillRect(pad.l,pad.t-12,12,10);
+  ctx.fillStyle='#444';ctx.font='11px sans-serif';ctx.textAlign='left';ctx.fillText('总成本',pad.l+14,pad.t-3);
+  ctx.fillStyle='rgba(212,160,23,0.9)';ctx.fillRect(pad.l+65,pad.t-12,12,10);
+  ctx.fillStyle='#444';ctx.fillText('文化传承',pad.l+79,pad.t-3);
+}
+
+function drawROIBar(){
+  const {c,ctx}=clearCanvas('chart-roi-bar');
+  const rev=v('roi-revenue'),cost=v('roi-cost'),alpha=v('roi-alpha'),beta=v('roi-beta'),gamma=v('roi-gamma');
+  const baseROI=cost>0?(rev-cost)/cost:0;
+  const corrROI=baseROI*(1+alpha)+beta*gamma;
+  const chROIs=S.channels.map(ch=>ch.cost>0?(ch.rev-ch.cost)/ch.cost:0);
+  const labels=['基础ROI','修正ROI',...S.channels.map(ch=>ch.name.slice(0,4))];
+  const values=[baseROI,corrROI,...chROIs];
+  const colors=['#c8622a','#d4a017','#2d7a4a','#1a6b8a','#7a3a8a','#e8845a'];
+  const maxV=Math.max(...values,2);
+  const pad={l:50,r:20,t:20,b:50};
+  const w=c.width-pad.l-pad.r,h=c.height-pad.t-pad.b;
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;
+  [0,0.5,1,1.5,2].forEach(v=>{
+    const y=pad.t+h*(1-v/maxV);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+w,y);ctx.stroke();
+    ctx.fillStyle='#888';ctx.font='10px sans-serif';ctx.textAlign='right';
+    ctx.fillText(v.toFixed(1),pad.l-4,y+4);
+  });
+  // bench line at 1.2
+  const benchy=pad.t+h*(1-1.2/maxV);
+  ctx.strokeStyle='rgba(200,98,42,0.5)';ctx.setLineDash([4,3]);ctx.beginPath();
+  ctx.moveTo(pad.l,benchy);ctx.lineTo(pad.l+w,benchy);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(200,98,42,.7)';ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillText('基准1.2',pad.l-4,benchy-2);
+
+  const bw=w/values.length*0.6,gap=w/values.length;
+  values.forEach((v,i)=>{
+    const bh=Math.max(v,0)/maxV*h;
+    ctx.fillStyle=colors[i%colors.length];
+    ctx.fillRect(pad.l+i*gap+(gap-bw)/2,pad.t+h-bh,bw,bh);
+    ctx.fillStyle='#444';ctx.font='10px sans-serif';ctx.textAlign='center';
+    ctx.fillText(labels[i],pad.l+i*gap+gap/2,pad.t+h+14);
+    if(v>0){ctx.fillStyle='#333';ctx.fillText(v.toFixed(2),pad.l+i*gap+gap/2,pad.t+h-bh-3);}
+  });
+}
+
+function drawPerfTrend(){
+  const {c,ctx}=clearCanvas('chart-perf-trend');
+  const scores=S.perfMonthly.map((row,i)=>{
+    const {total}=calcMonthScore(row,row.month);return total;
+  });
+  const maxV=Math.max(...scores,100);
+  const peaks=getPeakMonths();
+  const pad={l:45,r:20,t:20,b:40};
+  const w=c.width-pad.l-pad.r,h=c.height-pad.t-pad.b;
+  const gap=w/11;
+  // peak shading
+  peaks.forEach(m=>{
+    const xi=((m-1)%12);
+    ctx.fillStyle='rgba(212,160,23,0.12)';
+    ctx.fillRect(pad.l+xi*gap-gap/2,pad.t,gap,h);
+  });
+  // grid
+  ctx.strokeStyle='#ddd';ctx.lineWidth=1;
+  [0,25,50,75,100].forEach(v=>{
+    const y=pad.t+h*(1-v/maxV);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+w,y);ctx.stroke();
+    ctx.fillStyle='#888';ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillText(v,pad.l-4,y+4);
+  });
+  // grade lines
+  [{s:90,c:'rgba(45,122,74,.4)'},{s:80,c:'rgba(26,107,138,.4)'},{s:70,c:'rgba(199,120,0,.4)'}].forEach(({s,c})=>{
+    ctx.strokeStyle=c;ctx.setLineDash([3,3]);ctx.beginPath();
+    ctx.moveTo(pad.l,pad.t+h*(1-s/maxV));ctx.lineTo(pad.l+w,pad.t+h*(1-s/maxV));ctx.stroke();ctx.setLineDash([]);
+  });
+  // line
+  ctx.strokeStyle='var(--primary)';ctx.lineWidth=2;
+  ctx.beginPath();
+  scores.forEach((s,i)=>{
+    const x=pad.l+i*gap,y=pad.t+h*(1-s/maxV);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // dots
+  scores.forEach((s,i)=>{
+    const x=pad.l+i*gap,y=pad.t+h*(1-s/maxV);
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle=s>=90?'#2d7a4a':s>=80?'#1a6b8a':s>=70?'#c77800':'#c0392b';
+    ctx.fill();
+    ctx.fillStyle='#444';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText((i+1)+'月',x,pad.t+h+14);
+  });
+}
+
+function buildSummary(){
+  const el=document.getElementById('dashboard-summary');
+  const rev=v('roi-revenue'),cost=v('roi-cost');
+  const baseROI=cost>0?(rev-cost)/cost:0;
+  const colSums=Array(8).fill(0);
+  S.monthlyCost.forEach(row=>['c1','c2','c3','c4','c5','c6','c7','c8'].forEach((k,j)=>colSums[j]+=row[k]));
+  const totalCost=colSums.reduce((a,b)=>a+b,0);
+  const cultureRatio=totalCost>0?(colSums[0]/totalCost*100):0;
+  const scores=S.perfMonthly.map((row,i)=>calcMonthScore(row,row.month).total);
+  const validScores=scores.filter(s=>s>0);
+  const avgPerf=validScores.length>0?validScores.reduce((a,b)=>a+b,0)/validScores.length:0;
+  const roiStatus=baseROI>=1.2?'🟢 健康':baseROI>=1?'🟡 待优化':baseROI>0?'🔴 风险':'—';
+  const costStatus=cultureRatio>=32?'🟢 合规':'🔴 不合规';
+  const perfStatus=avgPerf>=90?'🟢 优秀':avgPerf>=80?'🔵 良好':avgPerf>=70?'🟡 合格':avgPerf>0?'🔴 不合格':'—';
+  el.innerHTML=`
+    <div class="kpi"><div class="kpi-label">项目ROI状态</div><div class="kpi-value" style="font-size:16px">${roiStatus}</div><div class="kpi-unit">基础ROI: ${baseROI>0?baseROI.toFixed(2):'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">成本合规状态</div><div class="kpi-value" style="font-size:16px">${costStatus}</div><div class="kpi-unit">文化成本占比: ${cultureRatio.toFixed(1)}%</div></div>
+    <div class="kpi"><div class="kpi-label">绩效评级</div><div class="kpi-value" style="font-size:16px">${perfStatus}</div><div class="kpi-unit">平均综合得分: ${avgPerf>0?avgPerf.toFixed(1):'—'}</div></div>
+  `;
+}
+
+// ============================================================
+// DEMO DATA (案例数据)
+// ============================================================
+function loadDemoData(){
+  // 成本核算案例：赫哲族冬捕非遗文旅项目（12个月）
+  S.monthlyCost=[];
+  for(let i=0;i<12;i++){
+    const m=i+1;
+    const isPeak=m<=2||m===12; // 冬捕旺季：12月~次年2月
+    S.monthlyCost.push({
+      month:m,
+      c1:6000,                                 // 场地租赁（冰面临时设施）
+      c2:m===11?80000:800,                    // 设备：11月冬捕季前一次性采购
+      c3:2000+(i%3)*300,                      // 物料采购（鱼具/保暖用品）
+      c4:25000,                                // 人员薪酬
+      c5:isPeak?15000:5000,                   // 营销推广（冬捕旺季较高）
+      c6:7000,                                 // 管理运营
+      c7:12000,                                // 文化专项（祭祀/传承人津贴）
+      c8:1500                                  // 其他
+    });
+  }
+  // 传承人：1个国家级 + 1个省级
+  S.laborRows=[
+    {month:11,name:'尤师傅（国家级）',level:'国家级',hours:50,revenue:600000},
+    {month:11,name:'吴师傅（省级）',level:'省级',hours:70,revenue:350000},
+    {month:12,name:'尤师傅（国家级）',level:'国家级',hours:40,revenue:800000},
+    {month:12,name:'吴师傅（省级）',level:'省级',hours:60,revenue:450000},
+    {month:1,name:'尤师傅（国家级）',level:'国家级',hours:30,revenue:400000},
+  ];
+  // 核心仪式：2场
+  S.ceremonyRows=[
+    {name:'冬捕开网祭祀',date:'2025-12-18',item:'祭祀用品+传承人津贴',amount:10000,voucher:'FPS-001',person:'尤师傅'},
+    {name:'丰收还愿仪式',date:'2026-02-20',item:'仪式布置+贡品',amount:15000,voucher:'FPS-002',person:'吴师傅'},
+  ];
+  // 成本核算参数（已默认，无需修改）
+
+  // ROI测算案例
+  document.getElementById('roi-revenue').value=4800000;  // 总营收480万
+  document.getElementById('roi-cost').value=3200000;     // 总成本320万
+  document.getElementById('roi-alpha').value=0.22;
+  document.getElementById('roi-beta').value=0.85;
+  document.getElementById('roi-gamma').value=0.12;
+  // 四大渠道
+  S.channels[0].cost=70000;  S.channels[0].rev=550000;   // 抖音（冰雪文旅）
+  S.channels[1].cost=40000;  S.channels[1].rev=350000;   // 小红书
+  S.channels[2].cost=25000;  S.channels[2].rev=200000;   // 微信
+  S.channels[3].cost=85000;  S.channels[3].rev=250000;   // KOL
+  // 体验环节
+  S.experiences[0].dc=40000; S.experiences[0].ic=18000; S.experiences[0].rev=700000;  // 冬捕体验
+  S.experiences[1].dc=35000; S.experiences[1].ic=12000; S.experiences[1].rev=450000;  // 赫哲鱼皮制作
+  S.experiences[2].dc=18000; S.experiences[2].ic=8000;  S.experiences[2].rev=250000;  // 文创销售
+  // 复购环节
+  S.retentions[0].rev=180000; S.retentions[0].cost=18000;  // 会员复购
+  S.retentions[1].rev=120000; S.retentions[1].cost=25000;  // 推荐奖励
+
+  // 绩效评价案例（12个月，冬捕旺季12/1/2月数据上浮）
+  const perfBase={营收:30,ROI:25,毛利率:18,现金流:12,授徒:10,展示:8,原创率:7,数字化率:5,转化率:9,客单价:6,曝光:8,满意度:10};
+  const peakMonths=[12,1,2];
+  S.perfMonthly=[];
+  for(let i=0;i<12;i++){
+    const m=i+1;
+    const isPeak=peakMonths.includes(m);
+    const growth=1+i*0.04;
+    const row={month:m};
+    Object.keys(perfBase).forEach(k=>{
+      let val=perfBase[k]*growth*(isPeak?1.2:1);
+      if(k==='满意度'||k==='原创率'||k==='数字化率') val=Math.min(val,100);
+      row[k]=Math.round(val);
+    });
+    S.perfMonthly.push(row);
+  }
+  // 传承人评分
+  document.getElementById('inh-mastery').value=9.2;
+  document.getElementById('inh-active').value=8.8;
+  document.getElementById('inh-innovation').value=8.5;
+  document.getElementById('inh-influence').value=9.0;
+  // 旺季月份设置为冬捕季
+  const peakInput=document.getElementById('peak-months');
+  if(peakInput) peakInput.value='12,1,2';
+
+  // 重新渲染所有页面
+  initCostPage();
+  initROIPage();
+  initPerfPage();
+  // 自动切换到成本核算页并触发计算
+  switchPage('cost');
+  setTimeout(()=>{
+    calcCost();
+    calcROI();
+    calcPerfAll();
+    calcInheritorScore();  // 修复：加载案例后同步计算传承人得分
+  },100);
+  alert('✅ 案例数据已加载！\n\n项目：赫哲族冬捕非遗文旅项目\n• 总营收：480万元\n• 总成本：320万元\n• 基础ROI：50%\n• 文化修正ROI：待计算\n\n请查看各模块计算结果。');
+}
+
+// ============================================================
+// EXPORT TO XLSX (pure JS, no dependency)
+// ============================================================
+// ============================================================
+// EXPORT: HTML table → .xls (Excel直接打开)
+// ============================================================
+function exportData(){
+  let h='<html><head><meta charset="utf-8"><style>th{background:#1a4a6a;color:#fff;padding:6px 10px;font-size:12px}td{padding:5px 10px;font-size:12px;border:1px solid #ccc}table{border-collapse:collapse;margin-bottom:20px}tr:nth-child(even) td{background:#f0f5f0}</style></head><body>';
+
+  // 1. 成本核算
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">成本核算 · 月度明细</h3><table>';
+  h+='<tr><th>月份</th><th>场地租赁(元)</th><th>设备购置(元)</th><th>物料采购(元)</th><th>人员薪酬(元)</th><th>营销推广(元)</th><th>管理运营(元)</th><th>文化专项(元)</th><th>其他(元)</th><th>月度合计(元)</th></tr>';
+  let tc1=0,tc2=0,tc3=0,tc4=0,tc5=0,tc6=0,tc7=0,tc8=0;
+  S.monthlyCost.forEach(r=>{
+    const t=r.c1+r.c2+r.c3+r.c4+r.c5+r.c6+r.c7+r.c8;
+    tc1+=r.c1;tc2+=r.c2;tc3+=r.c3;tc4+=r.c4;tc5+=r.c5;tc6+=r.c6;tc7+=r.c7;tc8+=r.c8;
+    h+=`<tr><td>${r.month}月</td><td>${r.c1}</td><td>${r.c2}</td><td>${r.c3}</td><td>${r.c4}</td><td>${r.c5}</td><td>${r.c6}</td><td>${r.c7}</td><td>${r.c8}</td><td><b>${t}</b></td></tr>`;
+  });
+  h+=`<tr style="background:#d4e8d4"><td><b>年度合计</b></td><td><b>${tc1}</b></td><td><b>${tc2}</b></td><td><b>${tc3}</b></td><td><b>${tc4}</b></td><td><b>${tc5}</b></td><td><b>${tc6}</b></td><td><b>${tc7}</b></td><td><b>${tc8}</b></td><td><b>${tc1+tc2+tc3+tc4+tc5+tc6+tc7+tc8}</b></td></tr></table>`;
+
+  // 1.5 成本核算 KPI 看板
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">成本核算 · KPI看板</h3><table>';
+  h+='<tr><th>年度总成本(元)</th><th>文化传承成本(元)</th><th>文化成本占比</th><th>核心仪式成本(元)</th><th>仪式占文化成本</th><th>传承人劳务总计(元)</th></tr>';
+  const g=id=>document.getElementById(id)?.textContent?.trim()||'0';
+  h+=`<tr><td>${g('k-total-cost')}</td><td>${g('k-culture-cost')}</td><td>${g('k-culture-ratio')}</td><td>${g('k-ceremony-cost')}</td><td>${g('k-ceremony-ratio')}</td><td>${g('k-labor-total')}</td></tr></table>`;
+
+  // 2. 传承人劳务
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">传承人劳务 · 三级计价</h3><table>';
+  h+='<tr><th>月份</th><th>姓名</th><th>级别</th><th>工时(h)</th><th>项目营收(元)</th><th>基础劳务(元)</th><th>技艺溢价(元)</th><th>项目分红(元)</th><th>总报酬(元)</th></tr>';
+  if(S.laborRows.length){
+    S.laborRows.forEach(r=>{
+      const base=r.hours*S.costParams[r.level].base;
+      const premium=base*S.costParams[r.level].premium;
+      const bonus=r.revenue*S.costParams[r.level].bonus;
+      h+=`<tr><td>${r.month}月</td><td>${r.name}</td><td>${r.level}</td><td>${r.hours}</td><td>${r.revenue}</td><td>${Math.round(base)}</td><td>${Math.round(premium)}</td><td>${Math.round(bonus)}</td><td><b>${Math.round(base+premium+bonus)}</b></td></tr>`;
+    });
+  }else h+='<tr><td colspan="9">（暂无数据）</td></tr>';
+  h+='</table>';
+
+  // 3. 核心仪式
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">核心仪式台账</h3><table>';
+  h+='<tr><th>仪式名称</th><th>日期</th><th>项目</th><th>金额(元)</th><th>凭证号</th><th>负责人</th></tr>';
+  if(S.ceremonyRows.length){
+    S.ceremonyRows.forEach(r=>{h+=`<tr><td>${r.name}</td><td>${r.date}</td><td>${r.item}</td><td>${r.amount}</td><td>${r.voucher}</td><td>${r.person}</td></tr>`;});
+  }else h+='<tr><td colspan="6">（暂无数据）</td></tr>';
+  h+='</table>';
+
+  // 4. ROI测算
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">ROI测算结果</h3><table>';
+  const R=v('roi-revenue'),C=v('roi-cost'),A=v('roi-alpha'),B=v('roi-beta'),G=v('roi-gamma');
+  const baseROI=C>0?(R-C)/C*100:0;
+  const corrROI=R>0?R*(1+A)*(1+B*(G-0.1))-C:0;
+  h+=`<tr><td><b>总营收(元)</b></td><td>${R||'—'}</td><td><b>总成本(元)</b></td><td>${C||'—'}</td></tr>`;
+  h+=`<tr><td><b>基础ROI</b></td><td>${baseROI.toFixed(2)}%</td><td><b>文化修正ROI</b></td><td>${C>0?(corrROI/C*100).toFixed(2)+'%':'—'}</td></tr>`;
+  h+='</table>';
+
+  // 4.5 ROI 结果看板
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">ROI测算 · 结果看板</h3><table>';
+  h+='<tr><th>基础财务ROI</th><th>文化价值修正ROI</th><th>项目利润（万元）</th><th>项目状态</th><th>基础ROI基准</th><th>修正ROI基准</th></tr>';
+  h+=`<tr>
+    <td>${document.getElementById('r-base-roi')?.textContent||'—'}</td>
+    <td>${document.getElementById('r-corrected-roi')?.textContent||'—'}</td>
+    <td>${document.getElementById('r-profit')?.textContent||'—'}</td>
+    <td>${document.getElementById('r-project-status')?.textContent||'—'}</td>
+    <td>1.20</td><td>1.50</td>
+  </tr></table>`;
+
+  // 5. ROI渠道
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">四大渠道ROI</h3><table>';
+  h+='<tr><th>渠道</th><th>投入成本(元)</th><th>转化营收(元)</th><th>ROI</th><th>预警</th></tr>';
+  S.channels.forEach(ch=>{
+    const roi=ch.cost>0?((ch.rev-ch.cost)/ch.cost*100).toFixed(1):'—';
+    const w=ch.rev>0&&ch.cost>0?(ch.rev/ch.cost>=2?'健康':ch.rev/ch.cost>=1.2?'预警':'风险'):'—';
+    h+=`<tr><td>${ch.name}</td><td>${ch.cost||0}</td><td>${ch.rev||0}</td><td>${roi}%</td><td>${w}</td></tr>`;
+  });
+  h+='</table>';
+
+  // 5.5 体验项目ROI
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">体验项目ROI分析</h3><table>';
+  h+='<tr><th>项目名称</th><th>直接成本(元)</th><th>间接成本(元)</th><th>营收(元)</th><th>ROI</th><th>状态</th></tr>';
+  S.experiences.forEach((ex,i)=>{
+    const tc=ex.dc+ex.ic;
+    const roi=tc>0?((ex.rev-tc)/tc*100).toFixed(1)+'%':'—';
+    h+=`<tr><td>${ex.name}</td><td>${ex.dc||0}</td><td>${ex.ic||0}</td><td>${ex.rev||0}</td><td>${roi}</td><td>${document.getElementById('ex-status-'+i)?.textContent||'—'}</td></tr>`;
+  });
+  h+='</table>';
+
+  // 5.6 复购环节ROI
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">复购环节ROI分析</h3><table>';
+  h+='<tr><th>环节类型</th><th>营收(元)</th><th>成本(元)</th><th>ROI</th><th>基准</th><th>状态</th></tr>';
+  S.retentions.forEach((r,i)=>{
+    const roi=r.cost>0?((r.rev-r.cost)/r.cost*100).toFixed(1)+'%':'—';
+    h+=`<tr><td>${r.type}</td><td>${r.rev||0}</td><td>${r.cost||0}</td><td>${roi}</td><td>${r.bench}</td><td>${document.getElementById('ret-status-'+i)?.textContent||'—'}</td></tr>`;
+  });
+  h+='</table>';
+
+  // 5.7 预警看板
+  const alertEls=document.querySelectorAll('#warn-alerts .alert');
+  if(alertEls.length){
+    h+='<h3 style="color:#1a4a6a;font-family:sans-serif">预警看板 · 风险提示</h3><table>';
+    h+='<tr><th>级别</th><th>提示内容</th></tr>';
+    alertEls.forEach(el=>{
+      const type=el.classList.contains('alert-danger')?'高风险':el.classList.contains('alert-warn')?'预警':'健康';
+      const msg=el.textContent?.trim()||'';
+      h+=`<tr><td>${type}</td><td>${msg}</td></tr>`;
+    });
+    h+='</table>';
+  }
+  const decisionEl=document.getElementById('warn-decisions');
+  if(decisionEl?.textContent?.trim()){
+    h+='<h3 style="color:#1a4a6a;font-family:sans-serif">预警看板 · 决策建议</h3><table>';
+    h+='<tr><th>建议内容</th></tr>';
+    decisionEl.querySelectorAll('div').forEach(div=>{
+      const txt=div.textContent?.trim()||'';
+      if(txt) h+=`<tr><td>${txt}</td></tr>`;
+    });
+    h+='</table>';
+  }
+
+  // 6. 绩效评价
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">绩效评价 · 月度明细</h3><table>';
+  if(S.perfMonthly.length){
+    const ph=['月份','营收','ROI','毛利率','现金流','授徒','展示','原创率','数字化率','转化率','客单价','曝光','满意度'];
+    h+='<tr>'+ph.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+    S.perfMonthly.forEach(r=>{h+=`<tr>${ph.map(c=>`<td>${r[c]||0}</td>`).join('')}</tr>`;});
+  }else h+='<tr><td colspan="13">（暂无数据）</td></tr>';
+  h+='</table>';
+
+  // 6.5 绩效评价 KPI 看板
+  h+='<h3 style="color:#1a4a6a;font-family:sans-serif">绩效评价 · KPI看板</h3><table>';
+  h+='<tr><th>年度平均综合得分</th><th>评级</th><th>最高分月份</th><th>最低分月份</th></tr>';
+  h+=`<tr>
+    <td>${document.getElementById('pr-avg')?.textContent||'—'}</td>
+    <td>${document.getElementById('pr-grade')?.textContent||'—'}</td>
+    <td>${document.getElementById('pr-max-month')?.textContent||'—'}</td>
+    <td>${document.getElementById('pr-min-month')?.textContent||'—'}</td>
+  </tr></table>`;
+
+  // 6.7 绩效矩阵建议
+  const matrixEl=document.getElementById('perf-matrix-advice');
+  if(matrixEl?.textContent?.trim()){
+    h+='<h3 style="color:#1a4a6a;font-family:sans-serif">绩效评价 · 矩阵建议</h3><table>';
+    h+='<tr><th>建议内容</th></tr>';
+    matrixEl.querySelectorAll('.alert').forEach(el=>{
+      const txt=el.textContent?.trim()||'';
+      if(txt) h+=`<tr><td>${txt}</td></tr>`;
+    });
+    h+='</table>';
+  }
+
+  // 7. 传承人得分
+  const im=v('inh-mastery'),ia=v('inh-active'),ii=v('inh-innovation'),if_=v('inh-influence');
+  if(im||ia||ii||if_){
+    h+='<h3 style="color:#1a4a6a;font-family:sans-serif">传承人专项评估得分</h3><table>';
+    h+='<tr><th>维度</th><th>得分(满分10)</th><th>权重</th><th>加权分</th></tr>';
+    h+=`<tr><td>技艺熟练度</td><td>${im}</td><td>30%</td><td>${(im*0.3*10).toFixed(1)}</td></tr>`;
+    h+=`<tr><td>活跃度</td><td>${ia}</td><td>25%</td><td>${(ia*0.25*10).toFixed(1)}</td></tr>`;
+    h+=`<tr><td>创新度</td><td>${ii}</td><td>25%</td><td>${(ii*0.25*10).toFixed(1)}</td></tr>`;
+    h+=`<tr><td>影响力</td><td>${if_}</td><td>20%</td><td>${(if_*0.2*10).toFixed(1)}</td></tr>`;
+    const tot=((im*0.3+ia*0.25+ii*0.25+if_*0.2)*10);
+    h+=`<tr style="background:#d4e8d4"><td><b>综合得分</b></td><td colspan="3"><b>${tot.toFixed(1)} / 100</b></td></tr>`;
+    h+='</table>';
+  }
+
+  h+='</body></html>';
+  const blob=new Blob(['﻿'+h],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='非遗文旅测算报表_'+new Date().toISOString().slice(0,10)+'.xls';
+  a.click();
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetAll(){
+  if(!confirm('确定要重置所有数据吗？此操作不可撤销。')) return;
+  S.monthlyCost=Array.from({length:12},(_,i)=>({month:i+1,c1:0,c2:0,c3:0,c4:0,c5:0,c6:0,c7:0,c8:0}));
+  S.laborRows=[];S.ceremonyRows=[];
+  S.channels.forEach(ch=>{ch.cost=0;ch.rev=0;});
+  S.experiences.forEach(ex=>{ex.dc=0;ex.ic=0;ex.rev=0;});
+  S.retentions.forEach(r=>{r.rev=0;r.cost=0;});
+  S.perfMonthly=Array.from({length:12},(_,i)=>({month:i+1,营收:0,ROI:0,毛利率:0,现金流:0,授徒:0,展示:0,原创率:0,数字化率:0,转化率:0,客单价:0,曝光:0,满意度:0}));
+  ['roi-revenue','roi-cost','inh-mastery','inh-active','inh-innovation','inh-influence'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  initCostPage();initROIPage();initPerfPage();
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  initCostPage();
+  initROIPage();
+  initPerfPage();
+});
+</script>
+</body>
+</html>
