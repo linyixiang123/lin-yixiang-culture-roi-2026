@@ -116,7 +116,9 @@ canvas{max-width:100%}
   .page{padding:12px}
   .tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
   .tab-btn{font-size:13px;padding:8px 10px;white-space:nowrap;flex-shrink:0}
-  .tbl-wrap{font-size:12px}
+  .tbl-wrap{font-size:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;overflow-scrolling:touch}
+  .tbl-wrap table{min-width:900px}
+  .tbl-wrap tfoot td{background:var(--surface2)!important;font-weight:700}
   th,td{padding:5px 4px}
 }
 /* ADD ROW BTN */
@@ -157,7 +159,8 @@ canvas{max-width:100%}
     </div>
   </div>
 
-  <!-- KPIs：改成表格 -->
+  <!-- KPIs：改成表格，包在tbl-wrap里支持手机端横向滚动 -->
+  <div class="tbl-wrap">
   <table class="kpi-table" id="cost-kpis">
     <thead><tr>
       <th>年度总成本(元)</th><th>文化传承成本(元)</th><th>文化成本占比</th>
@@ -172,6 +175,7 @@ canvas{max-width:100%}
       <td class="kpi-num" id="k-labor-total">0</td>
     </tr></tbody>
   </table>
+  </div>
 
   <div id="cost-compliance-alerts"></div>
 
@@ -557,6 +561,7 @@ canvas{max-width:100%}
 
   <!-- 结果 -->
   <div class="tab-pane" id="perf-result">
+  <div class="tbl-wrap">
     <table class="kpi-table" id="perf-result-kpis">
       <thead><tr><th>年度平均综合得分</th><th>评级</th><th>最高分月份</th><th>最低分月份</th></tr></thead>
       <tbody><tr>
@@ -566,6 +571,7 @@ canvas{max-width:100%}
         <td class="kpi-num" id="pr-min-month">—</td>
       </tr></tbody>
     </table>
+  </div>
     <div class="card">
       <div class="card-title">月度绩效评分结果</div>
       <div class="tbl-wrap">
@@ -828,17 +834,37 @@ function renderLaborTable(){
     const bonus=(r.revenue||0)*p.bonus;
     const total=baseLab+premium+bonus;
     const levels=Object.keys(S.costParams).map(l=>`<option${l===r.level?' selected':''}>${l}</option>`).join('');
-    tbody.innerHTML+=`<tr>
-      <td><input type="number" value="${r.month}" min="1" max="12" onblur="S.laborRows[${i}].month=+this.value"></td>
-      <td><input type="text" value="${r.name}" onblur="S.laborRows[${i}].name=this.value"></td>
-      <td><select onchange="S.laborRows[${i}].level=this.value;recalcLaborAll()">${levels}</select></td>
-      <td><input type="number" value="${r.hours}" min="0" onblur="S.laborRows[${i}].hours=+this.value;recalcLaborAll()"></td>
-      <td><input type="number" value="${r.revenue}" min="0" onblur="S.laborRows[${i}].revenue=+this.value;recalcLaborAll()"></td>
-      <td>${fmt(baseLab)}</td><td>${fmt(premium)}</td><td>${fmt(bonus)}</td>
-      <td style="font-weight:700;color:var(--primary-dark)">${fmt(total)}</td>
+    tbody.innerHTML+=`<tr data-idx="${i}">
+      <td><input type="number" value="${r.month}" min="1" max="12" oninput="S.laborRows[${i}].month=+this.value"></td>
+      <td><input type="text" value="${r.name.replace(/"/g,'&quot;')}" oninput="S.laborRows[${i}].name=this.value"></td>
+      <td><select onchange="S.laborRows[${i}].level=this.value;recalcLaborRow(${i})">${levels}</select></td>
+      <td><input type="number" value="${r.hours}" min="0" oninput="S.laborRows[${i}].hours=+this.value;recalcLaborRow(${i})"></td>
+      <td><input type="number" value="${r.revenue}" min="0" oninput="S.laborRows[${i}].revenue=+this.value;recalcLaborRow(${i})"></td>
+      <td data-role="base">${fmt(baseLab)}</td>
+      <td data-role="premium">${fmt(premium)}</td>
+      <td data-role="bonus">${fmt(bonus)}</td>
+      <td data-role="total" style="font-weight:700;color:var(--primary-dark)">${fmt(total)}</td>
       <td><button class="del-btn" onclick="S.laborRows.splice(${i},1);renderLaborTable()">×</button></td>
     </tr>`;
   });
+}
+function recalcLaborRow(idx){
+  const r=S.laborRows[idx]; if(!r) return;
+  const p=S.costParams[r.level]||S.costParams['普通'];
+  const baseLab=(r.hours||0)*p.base;
+  const premium=baseLab*p.premium;
+  const bonus=(r.revenue||0)*p.bonus;
+  const total=baseLab+premium+bonus;
+  const tr=document.querySelector(`#labor-body tr[data-idx="${idx}"]`);
+  if(!tr) return;
+  tr.querySelectorAll('[data-role]').forEach(td=>{
+    const role=td.dataset.role;
+    if(role==='base') td.textContent=fmt(baseLab);
+    if(role==='premium') td.textContent=fmt(premium);
+    if(role==='bonus') td.textContent=fmt(bonus);
+    if(role==='total') td.textContent=fmt(total);
+  });
+  debouncedCalcCost();
 }
 function recalcLaborAll(){renderLaborTable();debouncedCalcCost();}
 
