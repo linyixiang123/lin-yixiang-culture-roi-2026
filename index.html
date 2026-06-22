@@ -776,8 +776,7 @@ function calcCost(){
 
   // ceremony
   const ceremonyCost=S.ceremonyRows.reduce((a,r)=>a+(parseFloat(r.amount)||0),0);
-  // labor
-  recalcLaborAll();
+  // labor - 直接从数据计算，不重建表格（避免销毁输入框）
   const laborTotal=S.laborRows.reduce((a,r)=>{
     const lv=r.level||'普通';
     const p=S.costParams[lv]||S.costParams['普通'];
